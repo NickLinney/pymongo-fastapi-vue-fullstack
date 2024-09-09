@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:4.4.6
+    container_name: mongodb
+    networks:
+      - data
+      - tools
+    volumes:
+      - mongo-data:/data/db
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=pass
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+    ports:
+      - "8081:8081"
+    networks:
+      - tools
+
+backend:
+  build: ./backend
+  container_name: backend
+  ports:
+    - "8000:8000"
+  networks:
+    - app
+    - data
+  depends_on:
+    - mongodb
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "8080:8080"
+    networks:
+      - app
+
+networks:
+  app:
+  data:
+  tools:
+
+volumes:
+  mongo-data:
